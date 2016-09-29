@@ -6,7 +6,7 @@ This script will export all the data that GroupMe stores about a single group. O
 2. Use your command line to install necessary modules (json, requests, and pandas)
 3. Open 'groupme_download.py' with IDLE
 4. Find your personal token on GroupMe's <a href="https://dev.groupme.com/session/new" target="_blank">developers website</a>. Click "Access Token" in the upper right. Paste your token between the apostrophes in 'groupme_download.py' after "token ="
-5. Find your group id by <a href="https://dev.groupme.com/bots/new" target="_blank">creating a bot</a> in the group you are interested in. The group id will now appear on the <a href="https://dev.groupme.com/bots" target="_blank">bots page</a>. You can delete the bot once you have the id. Paste your token between the apostrophes in 'groupme_download.py' after "group_id="
+5. Find your group id by <a href="https://dev.groupme.com/bots/new" target="_blank">creating a bot</a> in the group you are interested in. The group id will now appear on the <a href="https://dev.groupme.com/bots" target="_blank">bots page</a>. You can delete the bot once you have the id. Paste your token between the apostrophes in 'groupme_download.py' after "group_id ="
 6. At the bottom of 'groupme_download.py' update the directory you would like your CSV to export to.
 7. Save the script.
 8. Run the script in your command line or terminal. In windows, you would navigate to the directory of the scipt by typing "cd C:\Users\YOUR_USERNAME\Downloads". Run the script by typing "python groupme_download.py".
