@@ -2,29 +2,31 @@
 import os
 
 import requests
+from dotenv import load_dotenv
 
+load_dotenv()
 
 GROUPME_TOKEN = os.environ['GROUPME_TOKEN']
-GROUPME_GROUP_NAME = os.environ['GROUPME_GROUP_NAME']
 
+def msg_getter_generator(group_name=os.getenv('GROUPME_GROUP_NAME')):
+    if not group_name:
+        group_name = input('Enter group name: ')
 
-def get_all_msgs(group_name=GROUPME_GROUP_NAME):
     group_id = get_group_id(group_name)
 
-    all_group_msgs = []
     last_msg_id = None
+    next_100_msgs = True
 
-    while True:
+    while next_100_msgs:
         next_100_msgs = get_recent_messages(
             group_id=group_id,
             before_msg_id=last_msg_id
         )
 
         if next_100_msgs:
-            all_group_msgs.extend(next_100_msgs)
             last_msg_id = next_100_msgs[-1]['id']
-        else:
-            return all_group_msgs
+            for msg in next_100_msgs:
+                yield msg
 
 
 def get_recent_messages(group_id, before_msg_id=None):
@@ -34,7 +36,7 @@ def get_recent_messages(group_id, before_msg_id=None):
     response = requests.get(url, params)
 
     if response.status_code == 304:
-        print('Error 304: No previous messages found.')
+        # No previous messages found
         return []
     elif response.status_code != 200:
         response.raise_for_status()
@@ -56,3 +58,13 @@ def get_group_id(group_name):
             return group['id']
 
     raise ValueError('No group found with name:', group_name)
+
+
+if __name__ == "__main__":
+    import pandas as pd
+
+    data = msg_getter_generator()
+    df = pd.DataFrame(data)
+    df['created_at'] = (pd.to_datetime(df['created_at'], unit='s', utc=True)
+                          .dt.tz_convert('US/Central'))
+    df.to_csv('output.csv', index=False)
