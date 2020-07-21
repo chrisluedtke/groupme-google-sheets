@@ -1,17 +1,17 @@
 #! python3
 import os
+from ast import literal_eval
 
 import requests
+
+import pandas as pd
+import pygsheets
 from dotenv import load_dotenv
 
 load_dotenv()
 
-GROUPME_TOKEN = os.environ['GROUPME_TOKEN']
 
-def msg_getter_generator(group_name=os.getenv('GROUPME_GROUP_NAME')):
-    if not group_name:
-        group_name = input('Enter group name: ')
-
+def msg_getter_generator(group_name):
     group_id = get_group_id(group_name)
 
     last_msg_id = None
@@ -31,7 +31,11 @@ def msg_getter_generator(group_name=os.getenv('GROUPME_GROUP_NAME')):
 
 def get_recent_messages(group_id, before_msg_id=None):
     url = f'https://api.groupme.com/v3/groups/{group_id}/messages'
-    params={'token': GROUPME_TOKEN, 'limit': 100, 'before_id': before_msg_id}
+    params = {
+        'token': os.environ['GROUPME_TOKEN'],
+        'limit': 100,
+        'before_id': before_msg_id
+    }
 
     response = requests.get(url, params)
 
@@ -46,8 +50,8 @@ def get_recent_messages(group_id, before_msg_id=None):
 
 
 def get_group_id(group_name):
-    url = f'https://api.groupme.com/v3/groups'
-    params={'token': GROUPME_TOKEN, 'per_page': 100}
+    url = 'https://api.groupme.com/v3/groups'
+    params={'token': os.environ['GROUPME_TOKEN'], 'per_page': 100}
 
     response = requests.get(url, params)
 
@@ -61,10 +65,39 @@ def get_group_id(group_name):
 
 
 if __name__ == "__main__":
-    import pandas as pd
-
-    data = msg_getter_generator()
+    print(f"Downloading messages from group: {os.environ['GROUPME_GROUP_NAME']}")
+    data = msg_getter_generator(os.environ['GROUPME_GROUP_NAME'])
     df = pd.DataFrame(data)
     df['created_at'] = (pd.to_datetime(df['created_at'], unit='s', utc=True)
                           .dt.tz_convert('US/Central'))
-    df.to_csv('output.csv', index=False)
+
+    col_order = [
+        'attachments',
+        'avatar_url',
+        'created_at',
+        'event',
+        'favorited_by',
+        'group_id',
+        'id',
+        'name',
+        'platform',
+        'sender_id',
+        'sender_type',
+        'source_guid',
+        'system',
+        'text',
+        'user_id'
+    ]
+    df = df[col_order]
+
+    print('Creating calculated columns')
+    df['num_likes'] = df.loc[:,'favorited_by'].str.len()
+    df['num_words'] = df.loc[:,'text'].str.findall(r'(\w+)').str.len().fillna(0)
+
+    print(f"Writing messages to Google sheet: {os.environ['GOOGLE_SHEET']}")
+    client = pygsheets.authorize(service_file='credentials.json')
+    sheet = client.open(os.environ['GOOGLE_SHEET'])
+    wks = sheet.sheet1
+    wks.set_dataframe(df=df, start=(1, 1), copy_index=False, extend=True, nan='')
+
+    print('Success!')
