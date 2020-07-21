@@ -1,6 +1,5 @@
 #! python3
 import os
-from ast import literal_eval
 
 import requests
 
@@ -51,7 +50,7 @@ def get_recent_messages(group_id, before_msg_id=None):
 
 def get_group_id(group_name):
     url = 'https://api.groupme.com/v3/groups'
-    params={'token': os.environ['GROUPME_TOKEN'], 'per_page': 100}
+    params = {'token': os.environ['GROUPME_TOKEN'], 'per_page': 100}
 
     response = requests.get(url, params)
 
@@ -65,7 +64,7 @@ def get_group_id(group_name):
 
 
 if __name__ == "__main__":
-    print(f"Downloading messages from group: {os.environ['GROUPME_GROUP_NAME']}")
+    print('Downloading messages from group')
     data = msg_getter_generator(os.environ['GROUPME_GROUP_NAME'])
     df = pd.DataFrame(data)
     df['created_at'] = (pd.to_datetime(df['created_at'], unit='s', utc=True)
@@ -91,10 +90,10 @@ if __name__ == "__main__":
     df = df[col_order]
 
     print('Creating calculated columns')
-    df['num_likes'] = df.loc[:,'favorited_by'].str.len()
-    df['num_words'] = df.loc[:,'text'].str.findall(r'(\w+)').str.len().fillna(0)
+    df['likes'] = df.loc[:,'favorited_by'].str.len()
+    df['words'] = df.loc[:,'text'].str.findall(r'(\w+)').str.len().fillna(0)
 
-    print(f"Writing messages to Google sheet: {os.environ['GOOGLE_SHEET']}")
+    print('Writing messages to Google sheet')
     client = pygsheets.authorize(service_file='credentials.json')
     sheet = client.open(os.environ['GOOGLE_SHEET'])
     wks = sheet.sheet1
