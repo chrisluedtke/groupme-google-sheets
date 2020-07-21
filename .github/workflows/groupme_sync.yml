@@ -15,6 +15,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check out master branch
+        uses: actions/checkout@v2
+        with:
+          ref: master
+
       - name: Write Google credential file
         run: echo "$GOOGLE_CREDS" > credentials.json
 
