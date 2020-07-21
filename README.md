@@ -1,6 +1,6 @@
 # GroupMe Export to Google Sheets
 
-This script retrieves all GroupMe message data from a group chat and writes it to a Google sheet.
+This script retrieves all GroupMe message data from a group chat and writes it to a Google sheet. Runs nightly via GitHub Actions.
 
 ### Local Setup
 1. Copy `.env.sample` to `.env` and fill in the variables.
