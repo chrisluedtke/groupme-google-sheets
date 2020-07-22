@@ -8,6 +8,7 @@ env:
   GROUPME_GROUP_NAME: ${{ secrets.GROUPME_GROUP_NAME }}
   GROUPME_TOKEN: ${{ secrets.GROUPME_TOKEN }}
   GOOGLE_SHEET: ${{ secrets.GOOGLE_SHEET }}
+  GOOGLE_CREDS: ${{ secrets.GOOGLE_CREDS }}
 
 jobs:
   groupme_sync:
