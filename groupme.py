@@ -64,6 +64,8 @@ def get_group_id(group_name):
 
 
 if __name__ == "__main__":
+    client = pygsheets.authorize(service_file='credentials.json')
+
     print('Downloading messages from group')
     data = msg_getter_generator(os.environ['GROUPME_GROUP_NAME'])
     df = pd.DataFrame(data)
@@ -94,7 +96,6 @@ if __name__ == "__main__":
     df['words'] = df.loc[:,'text'].str.findall(r'(\w+)').str.len().fillna(0)
 
     print('Writing messages to Google sheet')
-    client = pygsheets.authorize(service_file='credentials.json')
     sheet = client.open(os.environ['GOOGLE_SHEET'])
     wks = sheet.sheet1
     wks.set_dataframe(df=df, start=(1, 1), copy_index=False, extend=True, nan='')
